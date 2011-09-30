@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+crdt/__init__.py
+crdt.egg-info/PKG-INFO
+crdt.egg-info/SOURCES.txt
+crdt.egg-info/dependency_links.txt
+crdt.egg-info/entry_points.txt
+crdt.egg-info/not-zip-safe
+crdt.egg-info/top_level.txt
