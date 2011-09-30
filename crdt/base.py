@@ -1,4 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+from copy import deepcopy
+
 
 class StateCRDT(object):
     __metaclass__ = ABCMeta
@@ -7,14 +9,14 @@ class StateCRDT(object):
     def __init__(self):
         pass
 
-    @abstractmethod
     def clone(self):
         """Create a copy of this CRDT instance"""
-        pass
+        return self.__class__.from_payload(deepcopy(self.payload))
+    
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def merge(X, Y):
+    def merge(cls, X, Y):
         """Merge two replicas of this CRDT"""
         pass
 
@@ -37,9 +39,10 @@ class StateCRDT(object):
         """
         pass
 
-    @staticmethod
-    @abstractmethod
-    def from_payload(payload):
+    @classmethod
+    def from_payload(cls, payload):
         """Create a new instance of this CRDT using a payload.  This is useful for
         creating an instance using a deserialized value from a datastore."""
-        pass
+        new = cls()
+        new.payload = payload
+        return new
