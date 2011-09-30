@@ -11,9 +11,6 @@ class GCounter(StateCRDT):
     #
     # State-based CRDT API
     #
-    def clone(self):
-        return GCounter.from_payload(deepcopy(self.payload))
-
     def get_payload(self):
         return self._payload
 
@@ -26,14 +23,8 @@ class GCounter(StateCRDT):
     def value(self):
         return sum(c for (c, ts) in self.payload.itervalues())
 
-    @staticmethod
-    def from_payload(payload):
-        new = GCounter()
-        new.payload = payload
-        return new
-        
-    @staticmethod
-    def merge(X, Y):
+    @classmethod
+    def merge(cls, X, Y):
         """
         let ∀i ∈ [0,n − 1] : Z.P[i] = max(X.P[i],Y.P[i])
         """
@@ -76,30 +67,24 @@ class PNCounter(StateCRDT):
     #
     # State-based CRDT API
     #
-    @property
-    def payload(self):
+    def get_payload(self):
         return {
             "P": self.P.payload,
             "N": self.N.payload
             }
 
-    @staticmethod
-    def from_payload(payload):
-        new = PNCounter()
-        new.P.payload = payload['P']
-        new.N.payload = payload['N']
+    def set_payload(self, payload):
+        self.P.payload = payload['P']
+        self.N.payload = payload['N']
 
-        return new
-
-    def clone(self):
-        return PNCounter.from_payload(deepcopy(self.payload))
-
+    payload = property(get_payload, set_payload)
+        
     @property
     def value(self):
         return self.P.value - self.N.value
 
-    @staticmethod
-    def merge(X, Y):
+    @classmethod
+    def merge(cls, X, Y):
         merged_P = GCounter.merge(X.P, Y.P)
         merged_N = GCounter.merge(X.N, Y.N)
 
