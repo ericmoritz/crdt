@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from base import StateCRDT
 from copy import deepcopy
 from collections import MutableSet
@@ -7,6 +8,9 @@ class GSet(StateCRDT, MutableSet):
     def __init__(self):
         self._payload = set()
 
+    def __str__(self):
+        return "GSet(%s)" % (list(self.value))
+
     @classmethod
     def merge(cls, X, Y):
         merged = GSet()
@@ -14,8 +18,8 @@ class GSet(StateCRDT, MutableSet):
 
         return merged
 
-    def descends_from(self, other):
-        return other._payload.issubset(self._payload)
+    def compare(self, other):
+        return self.issubset(other)
 
     @property
     def value(self):
@@ -49,35 +53,45 @@ class GSet(StateCRDT, MutableSet):
 
 
 def test_gset():
+    """
+        {},{}
+      /       \
+  A{eric},{}   B{glenn},{}            +eric +glenn
+    |               | 
+ A{eric mark},{}    |                 +mark
+    |             /   \ 
+    |           /      \
+     \         /        \
+      \       /     B2{glenn tom}     +tom
+        \   /              \ 
+   AB{eric mark glenn}      \         <<merge>>
+            \               /
+             \             / 
+      ABB2{eric mark tom glenn}   <<merge>>
+    """
     A = GSet()
     B = GSet()
 
-    A1 = A.clone()
+    A.add("eric")
+    A.add("mark")
+    B.add("glenn")
+    B2 = B.clone()    
 
-    A1.add("eric")
-    assert A1.descends_from(A)
-    assert A1.value == set(["eric"])
-
-    B1 = B.clone()
+    AB = GSet.merge(A, B)
     
-    B1.add("glenn")
-    assert B1.descends_from(B)
-    assert B1.value == set(["glenn"])
+    B2.add("tom")
 
-    assert A1.descends_from(B1) == False
-
-    C = GSet.merge(A1, B1)
-
-    assert C.descends_from(A1)
-    assert C.descends_from(B1)
-
-    assert C.value == set(["eric", "glenn"])
+    ABB2 = GSet.merge(AB, B2)
+    assert ABB2.value == {"eric", "mark", "tom", "glenn"}, ABB2.value
 
 
 class TwoPSet(StateCRDT, MutableSet):
     def __init__(self):
         self.A = GSet()
         self.R = GSet()
+
+    def __str__(self):
+        return "TwoPSet(%s)" % (list(self.value))
 
     @classmethod
     def merge(cls, X, Y):
@@ -91,11 +105,14 @@ class TwoPSet(StateCRDT, MutableSet):
 
         return TwoPSet.from_payload(merged_payload)
 
-    def descends_from(self, other):
-        A_descends = self.A.descends_from(other.A)
-        R_descends = self.R.descends_from(other.R)
+    def compare(self, other):
+        """
+        (S.A ⊆ T.A ∨ S.R ⊆ T.R)
+        """
+        A_compare = self.A.compare(other.A)
+        R_compare = self.R.compare(other.R)
         
-        return A_descends and R_descends
+        return A_compare or R_compare
 
     @property
     def value(self):
@@ -131,26 +148,37 @@ class TwoPSet(StateCRDT, MutableSet):
             self.R.add(element)
 
 def test_towpset():
+    """
+        {},{}
+      /       \
+  A{eric},{}   B{glenn},{}          +eric +glenn
+    |             \ 
+ A{eric mark},{} B{glenn tom},{}   +mark +tom
+    |             /   \ 
+    |           /      \
+     \         /        \
+      \       /     B2{glenn tom},{tom}   -tom
+        \   /              \ 
+   AB{eric mark tom glenn}  \   <<merge>>
+            \               /
+             \             / 
+    ABB2{eric mark tom glenn},{tom}   <<merge>>
+
+    """      
     A = TwoPSet()
     B = TwoPSet()
-
-    A1 = A.clone()
-
-    A1.add("eric")
-    assert A1.descends_from(A)
-    assert A1.value == set(["eric"])
-
-    B1 = B.clone()
     
-    B1.add("glenn")
-    assert B1.descends_from(B)
-    assert B1.value == set(["glenn"])
+    A.add("eric")
+    B.add("glenn")
+    
+    A.add("mark")
+    B.add("tom")
 
-    assert A1.descends_from(B1) == False
+    AB = TwoPSet.merge(A, B)
 
-    C = TwoPSet.merge(A1, B1)
+    B2 = B.clone()
+    B2.remove("tom")
 
-    assert C.descends_from(A1)
-    assert C.descends_from(B1)
+    ABB2 = TwoPSet.merge(AB, B2)
+    assert ABB2.value == {"eric", "mark", "glenn"}, ABB2.value
 
-    assert C.value == set(["eric", "glenn"])
