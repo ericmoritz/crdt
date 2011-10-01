@@ -65,6 +65,8 @@ class GCounter(StateCRDT):
 
         self.payload[self.client_id] = c + 1
 
+    def __cmp__(self, other):
+        return self.value.__cmp__(other.value)
 
 class PNCounter(StateCRDT):
     def __init__(self, client_id=None):
@@ -137,6 +139,9 @@ class PNCounter(StateCRDT):
 
     def decrement(self):
         self.N.increment()
+
+    def __cmp__(self, other):
+        return self.value.__cmp__(other.value)
 
 
 def test_gcounter():
