@@ -1,13 +1,13 @@
-# -*- coding: utf8 -*-
-from time import time
+# -*- coding: utf-8 -*-
 from copy import deepcopy
-from base import StateCRDT
+from base import StateCRDT, random_client_id
+from abc import ABCMeta
 
 
 class GCounter(StateCRDT):
-    def __init__(self):
+    def __init__(self, client_id=None):
         self._payload = {}
-
+        self.client_id = client_id or random_client_id()
     #
     # State-based CRDT API
     #
@@ -17,53 +17,61 @@ class GCounter(StateCRDT):
     def set_payload(self, newp):
         self._payload = newp
 
+    def clone(self):
+        new = super(GCounter, self).clone()
+
+        # Copy the client id
+        new.client_id = self.client_id
+        return new
+
     payload = property(get_payload, set_payload)
 
     @property
     def value(self):
-        return sum(c for (c, ts) in self.payload.itervalues())
+        return sum(self.payload.itervalues())
+
+
+    def compare(self, other):
+        """
+        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i])
+        """
+        return all(self.payload.get(key, 0) <= other.payload.get(key, 0)
+                   for key in other.payload)
 
     @classmethod
     def merge(cls, X, Y):
         """
         let ∀i ∈ [0,n − 1] : Z.P[i] = max(X.P[i],Y.P[i])
         """
-        
         keys = set(X.payload.iterkeys()) | set(Y.payload.iterkeys())
         
         gen = ((key, max(X.payload.get(key, 0), Y.payload.get(key, 0)))
                for key in keys)
         
         return GCounter.from_payload(dict(gen))
-
-    def descends_from(self, other):
-        """
-        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i])
-        
-        Return True if all values in X are less than Y
-        """
-        try:
-            return all(self.payload[key] <= other.payload[key]
-                       for key in other.payload)
-        except KeyError:
-            return False
-
+    #
+    # Number API
+    #
+    def __str__(self):
+        return self.value.__str__()
     #
     # GCounter API
     #
-    def increment(self, cid):
+    def increment(self):
         try:
-            (c, ts) = self.payload[cid]
+            c = self.payload[self.client_id]
         except KeyError:
             c = 0
 
-        self.payload[cid] = (c+1, time())
+        self.payload[self.client_id] = c + 1
 
 
 class PNCounter(StateCRDT):
-    def __init__(self):
+    def __init__(self, client_id=None):
         self.P = GCounter()
         self.N = GCounter()
+        self.client_id = client_id or random_client_id()
+
     #
     # State-based CRDT API
     #
@@ -78,7 +86,25 @@ class PNCounter(StateCRDT):
         self.N.payload = payload['N']
 
     payload = property(get_payload, set_payload)
+
+    def get_client_id(self):
+        return self._cid
         
+    def set_client_id(self, client_id):
+        self._cid = client_id
+        self.P.client_id = client_id
+        self.N.client_id = client_id
+
+    client_id = property(get_client_id, set_client_id)
+
+    def clone(self):
+        new = super(PNCounter, self).clone()
+
+        # Copy the client id
+        new.client_id = self.client_id
+        return new
+
+
     @property
     def value(self):
         return self.P.value - self.N.value
@@ -94,104 +120,103 @@ class PNCounter(StateCRDT):
             }
         return PNCounter.from_payload(merged_payload)
 
-    def descends_from(self, other):
+    def compare(self, other):
         """
-        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i])
+        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i] ∧ ∀i ∈ [0, n − 1] : X.N[i] ≤ Y.N[i]
+        """
+        P_compare = self.P.compare(other.P)
+        N_compare = self.N.compare(other.N)
         
-        Return True if all values in X are less than Y
-        """
-        P_descends = self.P.descends_from(other.P)
-        N_descends = self.N.descends_from(other.N)
-
-        return P_descends and N_descends
+        return P_compare and N_compare
 
     #
     # Counter API
     # 
-    def increment(self, cid):
-        self.P.increment(cid)
+    def increment(self):
+        self.P.increment()
 
-    def decrement(self, cid):
-        self.N.increment(cid)
+    def decrement(self):
+        self.N.increment()
 
 
 def test_gcounter():
-    A = GCounter()
-    assert A.value == 0
+    """
+     []
+   /    \
+ A[a:1] B[b:1]       +1, +1
+   |     |  \
+   |     |    \
+   |    /      |
+ AB[a:1, b:1]  |     merge 
+   |           |
+ AB[a:2, b:1]  |      +1
+   |           |
+    \      B2[b:2]    +1
+     \         |
+      \       /
+    ABB2[a:2, b:2]    merge
+    """
 
-    B = GCounter()
-    assert B.value == 0
-
-    A1 = A.clone()
-    A1.increment("a")
-    assert A1.value == 1
-
-    B1 = B.clone()
-    B1.increment("b")
-    assert B1.value == 1
-
-    assert A1.descends_from(A)
-    assert B1.descends_from(B)
-    assert A1.descends_from(B1) == False
+    A = GCounter(client_id="a")
+    B = GCounter(client_id="b")
     
-    A2 = A1.clone()
-    A2.increment("a")
-    assert A2.value == 2
+    A.increment()
+    assert A.payload == {"a": 1}
+
+    B.increment()
+    assert B.payload == {"b": 1}
+
+    B2 = B.clone()
+    assert B2.payload == {"b": 1}
+
+    B2.increment()
+    assert B2.payload == {"b": 2}
+
+    AB = GCounter.merge(A, B)
+    AB.client_id = "a"
+    assert AB.payload == {"a": 1, "b": 1}
+
+    AB.increment()
+    assert AB.payload == {"a": 2, "b": 1}
     
-    C = GCounter.merge(A2, B1)
-    assert C.value == 3, C.value
-
-    C.increment("c")
-    assert C.value == 4, C.value
-
-    assert C.descends_from(B1)
-    assert C.descends_from(A2)
-
-
+    ABB2 = GCounter.merge(AB, B2)
+    assert ABB2.payload == {"a":2, "b":2}
+    
 def test_pncounter():
-    A = PNCounter()
-    assert A.value == 0
+    """
+        [ ] - [ ]
+         /       \ 
+  [a:1] - [ ]     [ ] - [b:1]   +1 -1
+        |           |
+  [a:1] - [a:1]   [ ] - [b:2]   -1 -1
+        |          / \
+         \       /     \ 
+          \     /       |
+  [a:1] - [a:1 b:2]     |      merge
+        |               |
+        |         [ ] - [b:3]   -1
+         \             /
+        [a:1] - [a:1 b:3]         merge
+        """
 
-    B = PNCounter()
-    assert B.value == 0
+    A = PNCounter(client_id="a")
+    B = PNCounter(client_id="b")
 
-    A1 = A.clone()
-    A1.increment("a")
-    assert A1.value == 1
-
-    B1 = B.clone()
-    B1.increment("b")
-    assert B1.value == 1
-
-    assert A1.descends_from(A)
-    assert B1.descends_from(B)
-    assert A1.descends_from(B1) == False
+    A.increment()
+    B.decrement()
     
-    A2 = A1.clone()
-    A2.increment("a")
-    assert A2.value == 2
+    A.decrement()
+    B.decrement()
+
+    AB = PNCounter.merge(A, B)
+
+    B2 = B.clone()
+    B2.decrement()
     
-    C = PNCounter.merge(A2, B1)
-    assert C.value == 3, C.value
-
-    C.increment("c")
-    assert C.value == 4, C.value
-
-    assert C.descends_from(B1)
-    assert C.descends_from(A2)
-
-    C.decrement("c")
-    assert C.value == 3, C.value
-    C.decrement("c")
-    assert C.value == 2, C.value
-    C.decrement("c")
-    assert C.value == 1, C.value
-    C.decrement("c")
-    assert C.value == 0, C.value
-    C.decrement("c")
-    assert C.value == -1, C.value
-
+    ABB2 = PNCounter.merge(AB, B2)
     
+    assert ABB2.value == -3
+
 if __name__ == '__main__':
     test_gcounter()
     test_pncounter()

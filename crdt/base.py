@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod, abstractproperty
 from copy import deepcopy
+import base64
+import random
+
+
+def random_client_id():
+    """Returns a random client identifier"""
+    return 'py_%s' % base64.b64encode(str(random.randint(1, 0x40000000)))
 
 
 class StateCRDT(object):
@@ -12,7 +20,6 @@ class StateCRDT(object):
     def clone(self):
         """Create a copy of this CRDT instance"""
         return self.__class__.from_payload(deepcopy(self.payload))
-    
 
     @classmethod
     @abstractmethod
@@ -21,8 +28,12 @@ class StateCRDT(object):
         pass
 
     @abstractmethod
-    def descends_from(self, other):
-        """Returns True if other descended from other"""
+    def compare(self, other):
+        """Returns True if self <= other
+
+        We require that, in a CvRDT, compare(x, y) to return x ≤v y, that abstract
+        states be equivalent if x ≤v y ∧ y ≤v x, and merge be always enabled.
+        """
         pass
 
     @abstractproperty
