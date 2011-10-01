@@ -54,9 +54,9 @@ class StateCRDT(object):
         pass
 
     @classmethod
-    def from_payload(cls, payload):
+    def from_payload(cls, payload, *args, **kwargs):
         """Create a new instance of this CRDT using a payload.  This is useful for
         creating an instance using a deserialized value from a datastore."""
-        new = cls()
+        new = cls(*args, **kwargs)
         new.payload = payload
         return new
