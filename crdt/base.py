@@ -17,6 +17,9 @@ class StateCRDT(object):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__, self.value)
+
     def clone(self):
         """Create a copy of this CRDT instance"""
         return self.__class__.from_payload(deepcopy(self.payload))
