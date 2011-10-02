@@ -34,8 +34,9 @@ class StateCRDT(object):
     def compare(self, other):
         """Returns True if self <= other
 
-        We require that, in a CvRDT, compare(x, y) to return x ≤v y, that abstract
-        states be equivalent if x ≤v y ∧ y ≤v x, and merge be always enabled.
+        We require that, in a CvRDT, compare(x, y) to return x ≤v y,
+        that abstract states be equivalent if x ≤v y ∧ y ≤v x, and
+        merge be always enabled.
         """
         pass
 
@@ -48,15 +49,16 @@ class StateCRDT(object):
     def payload(self):
         """This is a deepcopy-able version of the CRDT's payload.
 
-        If the CRDT is going to be serialized to storage, this is the data that should be
-        stored.
+        If the CRDT is going to be serialized to storage, this is the
+        data that should be stored.
         """
         pass
 
     @classmethod
     def from_payload(cls, payload, *args, **kwargs):
-        """Create a new instance of this CRDT using a payload.  This is useful for
-        creating an instance using a deserialized value from a datastore."""
+        """Create a new instance of this CRDT using a payload.  This
+        is useful for creating an instance using a deserialized value
+        from a datastore."""
         new = cls(*args, **kwargs)
         new.payload = payload
         return new
