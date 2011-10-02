@@ -1,4 +1,5 @@
-* TODO Move tests to test modules for nosetest
+* DONE Move tests to test modules for nosetest
+  - State "DONE"       from "TODO"       [2011-10-02 Sun 11:35]
 * TODO Add proper unittests
 * TODO Flesh out the SetStateCRDT methods
 * TODO Create a NumericStateCRDT for counters                         :maybe:
