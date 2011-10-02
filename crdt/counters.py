@@ -8,6 +8,7 @@ class GCounter(StateCRDT):
     def __init__(self, client_id=None):
         self._payload = {}
         self.client_id = client_id or random_client_id()
+
     #
     # State-based CRDT API
     #
@@ -30,7 +31,6 @@ class GCounter(StateCRDT):
     def value(self):
         return sum(self.payload.itervalues())
 
-
     def compare(self, other):
         """
         (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i])
@@ -44,16 +44,18 @@ class GCounter(StateCRDT):
         let ∀i ∈ [0,n − 1] : Z.P[i] = max(X.P[i],Y.P[i])
         """
         keys = set(X.payload.iterkeys()) | set(Y.payload.iterkeys())
-        
+
         gen = ((key, max(X.payload.get(key, 0), Y.payload.get(key, 0)))
                for key in keys)
-        
+
         return GCounter.from_payload(dict(gen))
+
     #
     # Number API
     #
     def __str__(self):
         return self.value.__str__()
+
     #
     # GCounter API
     #
@@ -67,6 +69,7 @@ class GCounter(StateCRDT):
 
     def __cmp__(self, other):
         return self.value.__cmp__(other.value)
+
 
 class PNCounter(StateCRDT):
     def __init__(self, client_id=None):
@@ -91,7 +94,7 @@ class PNCounter(StateCRDT):
 
     def get_client_id(self):
         return self._cid
-        
+
     def set_client_id(self, client_id):
         self._cid = client_id
         self.P.client_id = client_id
@@ -105,7 +108,6 @@ class PNCounter(StateCRDT):
         # Copy the client id
         new.client_id = self.client_id
         return new
-
 
     @property
     def value(self):
@@ -124,16 +126,17 @@ class PNCounter(StateCRDT):
 
     def compare(self, other):
         """
-        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i] ∧ ∀i ∈ [0, n − 1] : X.N[i] ≤ Y.N[i]
+        (∀i ∈ [0, n − 1] : X.P [i] ≤ Y.P [i] ∧
+        ∀i ∈ [0, n − 1] : X.N[i] ≤ Y.N[i]
         """
         P_compare = self.P.compare(other.P)
         N_compare = self.N.compare(other.N)
-        
+
         return P_compare and N_compare
 
     #
     # Counter API
-    # 
+    #
     def increment(self):
         self.P.increment()
 
@@ -152,7 +155,7 @@ def test_gcounter():
    |     |  \
    |     |    \
    |    /      |
- AB[a:1, b:1]  |     merge 
+ AB[a:1, b:1]  |     merge
    |           |
  AB[a:2, b:1]  |      +1
    |           |
@@ -164,7 +167,7 @@ def test_gcounter():
 
     A = GCounter(client_id="a")
     B = GCounter(client_id="b")
-    
+
     A.increment()
     assert A.payload == {"a": 1}
 
@@ -183,19 +186,20 @@ def test_gcounter():
 
     AB.increment()
     assert AB.payload == {"a": 2, "b": 1}
-    
+
     ABB2 = GCounter.merge(AB, B2)
-    assert ABB2.payload == {"a":2, "b":2}
-    
+    assert ABB2.payload == {"a": 2, "b": 2}
+
+
 def test_pncounter():
     """
         [ ] - [ ]
-         /       \ 
+         /       \
   [a:1] - [ ]     [ ] - [b:1]   +1 -1
         |           |
   [a:1] - [a:1]   [ ] - [b:2]   -1 -1
         |          / \
-         \       /     \ 
+         \       /     \
           \     /       |
   [a:1] - [a:1 b:2]     |      merge
         |               |
@@ -209,7 +213,7 @@ def test_pncounter():
 
     A.increment()
     B.decrement()
-    
+
     A.decrement()
     B.decrement()
 
@@ -217,9 +221,9 @@ def test_pncounter():
 
     B2 = B.clone()
     B2.decrement()
-    
+
     ABB2 = PNCounter.merge(AB, B2)
-    
+
     assert ABB2.value == -3
 
 if __name__ == '__main__':
