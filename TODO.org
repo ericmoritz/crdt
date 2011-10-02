@@ -1,0 +1,6 @@
+* TODO Move tests to test modules for nosetest
+* TODO Add proper unittests
+* TODO Flesh out the SetStateCRDT methods
+* TODO Create a NumericStateCRDT for counters                         :maybe:
+   that emulates a numeric type, 
+   http://docs.python.org/reference/datamodel.html#emulating-numeric-types
