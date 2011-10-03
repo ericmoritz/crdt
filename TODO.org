@@ -1,7 +1,11 @@
 * DONE Move tests to test modules for nosetest
   - State "DONE"       from "TODO"       [2011-10-02 Sun 11:35]
+* DONE Add the LWW element Set
+  - State "DONE"       from "TODO"       [2011-10-03 Mon 11:40]
+
 * TODO Add proper unittests
 * TODO Flesh out the SetStateCRDT methods
 * TODO Create a NumericStateCRDT for counters                         :maybe:
    that emulates a numeric type, 
    http://docs.python.org/reference/datamodel.html#emulating-numeric-types
+* TODO Add the two register types detailed in the INARA paper
