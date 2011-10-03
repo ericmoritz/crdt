@@ -55,6 +55,57 @@ class GSet(SetStateCRDT):
         raise NotImplementedError("This is a grow-only set")
 
 
+class LWWSet(SetStateCRDT):
+    def __init__(self):
+        self.A = {}
+        self.R = {}
+
+    def compare(self, other):
+        pass
+
+    @property
+    def value(self):
+        return set(e for (e, ts) in self.A.iteritems()
+                   if ts >= self.R.get(e, 0))
+
+    @classmethod
+    def _merged_dicts(cls, x, y):
+        new = {}
+        keys = set(x) | set(y)
+        for key in keys:
+            new[key] = max(x.get(key,0), y.get(key, 0))
+
+        return new
+
+    @classmethod
+    def merge(cls, X, Y):
+        payload = {
+            "A": cls._merged_dicts(X.A, Y.A),
+            "R": cls._merged_dicts(X.R, Y.R),
+            }
+
+        return cls.from_payload(payload)
+
+    def get_payload(self):
+        return {
+            "A": self.A,
+            "R": self.R,
+            }
+
+    def set_payload(self, payload):
+        self.A = payload['A']
+        self.R = payload['R']
+
+    payload = property(get_payload, set_payload)
+
+    def add(self, element):
+        self.A[element] = time()
+        
+    def discard(self, element):
+        if element in self.A:
+            self.R[element] = time()
+
+
 class TwoPSet(SetStateCRDT):
     def __init__(self):
         self.A = GSet()
