@@ -9,3 +9,5 @@
    that emulates a numeric type, 
    http://docs.python.org/reference/datamodel.html#emulating-numeric-types
 * TODO Add the two register types detailed in the INARA paper
+* TODO tag the payloads with they type of CRDT it represents
+For instance, {"lwwset": payload} or ["orset", payload]
