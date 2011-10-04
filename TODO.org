@@ -3,11 +3,16 @@
 * DONE Add the LWW element Set
   - State "DONE"       from "TODO"       [2011-10-03 Mon 11:40]
 
-* TODO Add proper unittests
-* TODO Flesh out the SetStateCRDT methods
-* TODO Create a NumericStateCRDT for counters                         :maybe:
+* CANCELED Create a NumericStateCRDT for counters                     :maybe:
    that emulates a numeric type, 
    http://docs.python.org/reference/datamodel.html#emulating-numeric-types
-* TODO Add the two register types detailed in the INARA paper
-* TODO tag the payloads with they type of CRDT it represents
+
+* CANCELED tag the payloads with they type of CRDT it represents      :maybe:
 For instance, {"lwwset": payload} or ["orset", payload]
+
+* TODO Add proper unittests
+* TODO Add the register types detailed in the INRIA paper
+* TODO Implement the remaining Set CRDTs
+* TODO Implement a MutableMapping CRDT
+* TODO Implement the Graph CRDTs detailed in the INRIA paper
+* TODO Implement the Replicated Growable Array CRDTs
