@@ -16,3 +16,7 @@ For instance, {"lwwset": payload} or ["orset", payload]
 * TODO Implement a MutableMapping CRDT
 * TODO Implement the Graph CRDTs detailed in the INRIA paper
 * TODO Implement the Replicated Growable Array CRDTs
+* TOOD Add garbage collection
+Currently the CRDT implementations are subject to unbounded growth.
+If these are to be used in production, the CRDTs will need the ability
+to compact their histories.
