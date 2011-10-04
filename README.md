@@ -55,7 +55,9 @@ Create a new CRDT instance with the given payload
 
 
 ### Compounnd CRDTs
-One property of CRDTs is that CRDTs made of CRDTs are automatically a CRDT.  This enables Compound CRDTs.  Here is a sample implementation of a social graph:
+One property of CRDTs is that CRDTs made of CRDTs are automatically a
+CRDT.  This enables Compound CRDTs.  Here is a sample implementation
+of a friendship:
 
     from crdt.sets import LWWSet
     from crdt.base import StateCRDT
