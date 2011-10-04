@@ -13,31 +13,12 @@ def random_client_id():
 class StateCRDT(object):
     __metaclass__ = ABCMeta
 
+    #
+    # Abstract methods
+    #
+
     @abstractmethod
     def __init__(self):
-        pass
-
-    def __repr__(self):
-        return "<%s %s>" % (self.__class__, self.value)
-
-    def clone(self):
-        """Create a copy of this CRDT instance"""
-        return self.__class__.from_payload(deepcopy(self.payload))
-
-    @classmethod
-    @abstractmethod
-    def merge(cls, X, Y):
-        """Merge two replicas of this CRDT"""
-        pass
-
-    @abstractmethod
-    def compare(self, other):
-        """Returns True if self <= other
-
-        We require that, in a CvRDT, compare(x, y) to return x ≤v y,
-        that abstract states be equivalent if x ≤v y ∧ y ≤v x, and
-        merge be always enabled.
-        """
         pass
 
     @abstractproperty
@@ -53,6 +34,23 @@ class StateCRDT(object):
         data that should be stored.
         """
         pass
+
+    @classmethod
+    @abstractmethod
+    def merge(cls, X, Y):
+        """Merge two replicas of this CRDT"""
+        pass
+
+    #
+    # Built-in methods
+    #
+
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__, self.value)
+
+    def clone(self):
+        """Create a copy of this CRDT instance"""
+        return self.__class__.from_payload(deepcopy(self.payload))
 
     @classmethod
     def from_payload(cls, payload, *args, **kwargs):
