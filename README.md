@@ -4,6 +4,8 @@ The CRDT toolbox provides a collection of basic Conflict-free
 replicated data types as well as a common interface for defining your
 own CRDTs
 
+If you don't know what a CRDT is, watch [this](http://research.microsoft.com/apps/video/dl.aspx?id=153540)
+
 ## Definitions
 * CRDT - A Conflict-Free Replicated Data-Type as defined by the INRIA paper.
 * Payload - A JSON serializable representation of the CRDT's internal state
@@ -158,6 +160,6 @@ Now this object can easily be stored and retrieved
     print "Is eric following glenn?", "glenn" in eric.following
 
 ## References
-* [INRIA Paper](http://delicious.com/browsebar?urlmd5=964516bb26b35f9ebf0595d4eb870512&url=http://hal.archives-ouvertes.fr/docs/00/55/55/88/PDF/techreport.pdf)
-* [Marc Shapiro's talk @ Microsoft](http://delicious.com/browsebar?urlmd5=02ee56037f8286e1cd81ba371ae8252c&url=http://research.microsoft.com/apps/video/dl.aspx?id=153540)
-* [Logoot](http://delicious.com/browsebar?urlmd5=c7d1bfd700cba7552a34af19d5c6b94a&url=https://gforge.inria.fr/docman/view.php/1646/6393/weiss09.pdf) - CRDT for a distributed peer-to-peer Document editing
+* [INRIA Paper](http://hal.archives-ouvertes.fr/docs/00/55/55/88/PDF/techreport.pdf)
+* [Marc Shapiro's talk @ Microsoft](http://research.microsoft.com/apps/video/dl.aspx?id=153540)
+* [Logoot](https://gforge.inria.fr/docman/view.php/1646/6393/weiss09.pdf) - CRDT for a distributed peer-to-peer Document editing
