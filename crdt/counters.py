@@ -17,6 +17,8 @@ class GCounter(StateCRDT):
 
     def set_payload(self, newp):
         self._payload = newp
+    payload = property(get_payload, set_payload)
+
 
     def clone(self):
         new = super(GCounter, self).clone()
@@ -25,7 +27,6 @@ class GCounter(StateCRDT):
         new.client_id = self.client_id
         return new
 
-    payload = property(get_payload, set_payload)
 
     @property
     def value(self):
