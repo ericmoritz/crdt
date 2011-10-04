@@ -4,7 +4,8 @@ The CRDT toolbox provides a collection of basic Conflict-free
 replicated data types as well as a common interface for defining your
 own CRDTs
 
-If you don't know what a CRDT is, watch [this](http://research.microsoft.com/apps/video/dl.aspx?id=153540)
+If you don't know what a CRDT is, watch
+[this](http://research.microsoft.com/apps/video/dl.aspx?id=153540)
 
 ## Definitions
 * CRDT - A Conflict-Free Replicated Data-Type as defined by the INRIA paper.
@@ -18,11 +19,17 @@ If you don't know what a CRDT is, watch [this](http://research.microsoft.com/app
 * Compound CRDTs
 
 ### Storage-Independant
-To accomplish storage independance, the payload is exposed publically and as a simple JSON friendly data structures.
 
-The public visibility of the payload allows the CRDTs to be loaded and stored independant of how it is stored.
+To accomplish storage independance, the payload is exposed publically
+and as a simple JSON friendly data structures.
 
-While there exists serialization formats that allow non-JSON friendly structures -- such pickling a set -- targeting the lowest common denominator of JSON allows the possibility to serialize into a large number of formats.
+The public visibility of the payload allows the CRDTs to be loaded and
+stored independant of how it is stored.
+
+While there exists serialization formats that allow non-JSON friendly
+structures -- such pickling a set -- targeting the lowest common
+denominator of JSON allows the possibility to serialize into a large
+number of formats.
 
 ### Standard API
 
@@ -37,7 +44,10 @@ The base.StateCRDT class defines the interface for State-based CRDTs
 Creates a new CRDT at it's initial state
 
 ##### @property payload
-This is the serializable representation of the CRDT's internal state.  The data **SHOULD** be defined in simple types that can be represented as JSON, i.e. strings, numbers, dicts and lists.
+
+This is the serializable representation of the CRDT's internal state.
+The data **SHOULD** be defined in simple types that can be represented
+as JSON, i.e. strings, numbers, dicts and lists.
  
 ##### @property value
 This is the computed value of the CRDT.
@@ -72,7 +82,9 @@ of a friendship:
             self.followers = LWWSet()
     
         def get_payload(self):
-            assert self.user_key, "Can not generate a payload without a user_key"
+            assert self.user_key, \
+              "Can not generate a payload without a user_key"
+
             return {
                 "user_key": self.user_key,
                 "following": self.following.payload,
