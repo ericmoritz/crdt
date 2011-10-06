@@ -99,11 +99,11 @@ class LWWSet(SetStateCRDT):
     payload = property(get_payload, set_payload)
 
     def add(self, element):
-        self.A[element] = time()
+        self.A[element] = (time(), )
         
     def discard(self, element):
         if element in self.A:
-            self.R[element] = time()
+            self.R[element] = (time(), )
 
 
 class TwoPSet(SetStateCRDT):
