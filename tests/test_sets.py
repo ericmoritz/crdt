@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from crdt.sets import GSet, TwoPSet, ORSet, LWWSet
+from crdt.sets import GSet, TwoPSet, LWWSet
 from crdt import sets
 import time
 
@@ -97,42 +97,3 @@ def test_lwwset():
     assert D.value == set(["eric"])
 
     sets.time = old_time
-
-
-def test_orset():
-    A = ORSet()
-
-    A.add("eric")
-
-    # Do a concurrent add/removes.
-    B = A.clone()
-    C = A.clone()
-    D = A.clone()
-
-    B.add("eric")
-    C.remove("eric")
-    D.remove("eric")
-
-    # With an ORSet, add trumps any concurrent removes
-    BC = ORSet.merge(B, C)
-    assert BC.value == {"eric"}
-
-    # Test concurrent removes + serial add
-    A = ORSet()
-    A.add("eric")
-
-    # Concurrently remove "eric"
-    A1 = A.clone()
-    A2 = A.clone()
-
-    A1.remove("eric")
-    assert "eric" not in A1
-
-    A2.remove("eric")
-    assert "eric" not in A2
-
-    A1_2 = ORSet.merge(A1, A2)
-    assert "eric" not in A1_2
-
-    A1_2.add("eric")
-    assert "eric" in A1_2
