@@ -174,6 +174,7 @@ Now this object can easily be stored and retrieved
     print "Is eric following glenn?", "glenn" in eric.following
 
 ## References
-* [INRIA Paper](http://hal.archives-ouvertes.fr/docs/00/55/55/88/PDF/techreport.pdf)
+* [Conﬂict-free Replicated Data Types](http://hal.inria.fr/docs/00/60/93/99/PDF/RR-7687.pdf)
+* [A comprehensive study of Convergent and Commutative Replicated Data Types](http://hal.archives-ouvertes.fr/docs/00/55/55/88/PDF/techreport.pdf)
 * [Marc Shapiro's talk @ Microsoft](http://research.microsoft.com/apps/video/dl.aspx?id=153540)
 * [Logoot](https://gforge.inria.fr/docman/view.php/1646/6393/weiss09.pdf) - CRDT for a distributed peer-to-peer Document editing
