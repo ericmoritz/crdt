@@ -14,17 +14,17 @@ If you don't know what a CRDT is, watch
 
 ## Goals
 
-* Storage-Independance
+* Storage-Independence
 * Standard API
 * Compound CRDTs
 
-### Storage-Independant
+### Storage-Independent
 
-To accomplish storage independance, the payload is exposed publically
+To accomplish storage independence, the payload is exposed publically
 and as a simple JSON friendly data structures.
 
 The public visibility of the payload allows the CRDTs to be loaded and
-stored independant of how it is stored.
+stored independent of how it is stored.
 
 While there exists serialization formats that allow non-JSON friendly
 structures -- such pickling a set -- targeting the lowest common
@@ -64,7 +64,7 @@ Creates a new copy of the CRDT instance
 Create a new CRDT instance with the given payload
 
 
-### Compounnd CRDTs
+### Compound CRDTs
 One property of CRDTs is that CRDTs made of CRDTs are automatically a
 CRDT.  This enables Compound CRDTs.  Here is a sample implementation
 of a friendship:
